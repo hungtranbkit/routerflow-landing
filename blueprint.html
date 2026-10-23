@@ -113,6 +113,7 @@ window.addEventListener('DOMContentLoaded',()=>{
  el('print').addEventListener('click',()=>{if(latest)window.print()});
  el('copy').addEventListener('click',async()=>{if(!latest)return;try{await navigator.clipboard.writeText(api.asText(latest));el('copy').textContent='✓ Đã sao chép';}catch{el('report').focus();el('copy').textContent='Chọn nội dung để sao chép';}});
  el('download').addEventListener('click',()=>{if(!latest)return;const blob=new Blob([api.asText(latest)],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='routerflow-blueprint.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+ form.requestSubmit(); // Show a clearly marked draft sample on first visit.
 });
 </script>
 </body></html>
