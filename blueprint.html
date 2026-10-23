@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d1618">
+<meta name="description" content="RouterFlow Network Blueprint: mô phỏng phương án WAN, LAN, Wi-Fi và danh mục vật tư theo dữ liệu bạn cung cấp. Công cụ chỉ tính toán cục bộ, không truy cập router.">
+<title>Network Blueprint — RouterFlow</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1618;--paper:#152225;--card:#1c2c30;--line:#33454a;--fg:#eff5e9;--muted:#a9bab7;--accent:#b8f465;--cyan:#67cbd1;--danger:#ffbf96;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--fg);line-height:1.55}
+a{color:inherit}a:hover{color:var(--accent)}.wrap{max-width:1150px;margin:auto;padding:0 24px}
+header{position:sticky;top:0;background:#0d1618ed;backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:10}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{text-decoration:none;font-size:22px;font-weight:850;letter-spacing:-1.2px}.brand b{color:var(--accent)}.nav a.back{font-size:13px;color:var(--muted);text-decoration:none;border:1px solid var(--line);padding:9px 13px;border-radius:8px}
+.hero{padding:60px 0 26px;display:flex;justify-content:space-between;align-items:end;gap:24px}.eyebrow{color:var(--accent);letter-spacing:.15em;font-size:11px;font-weight:800;text-transform:uppercase}.hero h1{font-size:clamp(38px,5vw,64px);line-height:1.06;letter-spacing:-.055em;margin:12px 0 16px;max-width:750px}.hero h1 span{color:var(--accent)}.hero p{color:var(--muted);max-width:680px;font-size:16px;margin:0}.hero-tag{font:12px ui-monospace,monospace;color:var(--cyan);border:1px solid var(--line);border-radius:99px;padding:8px 12px;white-space:nowrap;margin-bottom:8px}
+.notice{margin:22px 0 30px;border:1px solid #56713b;padding:13px 17px;border-radius:12px;color:#d9f0bb;background:#243123;font-size:13px}
+.layout{display:grid;grid-template-columns:410px minmax(0,1fr);gap:20px;align-items:start;padding-bottom:90px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:17px;overflow:hidden}.panel-head{padding:19px 22px;border-bottom:1px solid var(--line)}.panel-head h2{margin:0;font-size:18px;letter-spacing:-.02em}.panel-head p{margin:6px 0 0;color:var(--muted);font-size:12px}.panel-body{padding:22px}
+fieldset{border:0;padding:0;margin:0 0 18px}legend{font-weight:800;margin-bottom:10px;font-size:12px;color:var(--accent);letter-spacing:.04em;text-transform:uppercase}.fields{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field.full{grid-column:1/-1}
+label{font-size:12px;color:#d7e2dd;font-weight:650}input,select{width:100%;border:1px solid #42575a;background:#0d191b;color:var(--fg);font:inherit;padding:11px 10px;border-radius:9px;min-height:44px;outline:0}input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #b8f46522}
+.hint{font-size:11px;color:var(--muted);line-height:1.35}.btn{border:0;border-radius:10px;min-height:44px;font:inherit;font-weight:800;cursor:pointer;padding:10px 15px}.btn-primary{background:var(--accent);color:#0b1813;width:100%}.btn-primary:hover{background:#d1ff91}.btn-secondary{background:#243638;color:var(--fg);border:1px solid var(--line)}.btn:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.actions .btn{flex:1 1 120px;font-size:13px}.error{display:none;background:#492a28;border:1px solid #a3684f;color:#fff0d8;border-radius:8px;padding:12px;margin:0 0 15px;font-size:13px}
+.output{min-height:580px}.empty{padding:55px 32px;text-align:center;color:var(--muted)}.empty .glyph{font-size:40px;display:block;margin-bottom:16px}.empty strong{display:block;color:var(--fg);font-size:18px;margin-bottom:8px}
+.output-view{display:none}.output-view.show{display:block}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}.kpi{border:1px solid var(--line);background:var(--card);border-radius:11px;padding:14px}.kpi strong{display:block;font-size:25px;font-weight:850;letter-spacing:-.04em}.kpi small{display:block;color:var(--muted);font-size:11px}
+.draft{display:inline-flex;gap:6px;align-items:center;border:1px solid #786443;border-radius:99px;background:#3b3322;color:#ffd6a0;font-size:11px;padding:4px 9px;font-weight:750}
+.result-title{font-size:25px;line-height:1.2;letter-spacing:-.03em;margin:10px 0 4px}.result-sub{color:var(--muted);font-size:12px;margin:0 0 20px}.section-title{margin:21px 0 10px;font-size:12px;letter-spacing:.12em;color:var(--cyan);font-weight:800}
+.topology{border:1px solid var(--line);background:#101b1d;border-radius:12px;padding:16px;margin-bottom:6px;text-align:center}.topo-line{font-size:11px;letter-spacing:.02em;color:var(--muted)}.topo-core{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:10px}.topo-node{padding:7px 10px;border:1px solid #4a706a;border-radius:7px;background:#1c3433;font-size:12px;font-weight:750}.topo-node.accent{border-color:#9bc35e;color:var(--accent)}
+.tags{display:flex;flex-wrap:wrap;gap:7px}.tag{padding:6px 9px;border-radius:6px;border:1px solid var(--line);font-size:11px;color:#cfddd8;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:12px}th{color:var(--muted);text-align:left;font-weight:600;padding:8px 5px;border-bottom:1px solid var(--line)}td{padding:11px 5px;border-bottom:1px solid #2c3d40;vertical-align:top}td:nth-child(2){white-space:nowrap;font-weight:850;color:var(--accent)}td small{color:var(--muted);display:block}.money{font-size:23px;color:var(--accent);font-weight:850;letter-spacing:-.035em}.bullets{margin:0;padding-left:19px;color:#d8dfd9;font-size:12px}.bullets li{margin-bottom:7px}.bullets.warning li::marker{color:var(--danger)}
+.report{white-space:pre-wrap;overflow-wrap:anywhere;background:#101b1d;padding:18px;border-radius:8px;border:1px solid var(--line);color:#cddbd3;font-size:11px;line-height:1.65;max-height:260px;overflow:auto}
+footer{padding:20px 0 40px;text-align:center;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.hero{padding-top:42px}.hero-tag{display:none}.empty{padding:28px}}
+@media(max-width:460px){.wrap{padding:0 14px}.nav{height:62px}.hero h1{font-size:39px}.panel-body{padding:16px}.fields{gap:11px}.kpi{padding:10px}.kpi strong{font-size:21px}.kpi small{font-size:10px}.actions .btn{flex:1 1 100%}}
+@media print{*{color:#111!important;background:#fff!important;box-shadow:none!important}header,.hero,.notice,.input-panel,.actions,footer,.empty{display:none!important}.wrap{max-width:none;padding:0}.layout{display:block}.panel{border:0}.panel-head{display:none}.output-view{display:block!important}.report{max-height:none;overflow:visible;border:0;padding:0;font-size:10px;white-space:pre-wrap}.output-view>*:not(.report){display:none!important}body{font-family:Arial,sans-serif}@page{size:A4;margin:17mm}}
+</style>
+<script defer src="./assets/blueprint-engine.js"></script>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="./index.html">router<b>flow</b><span style="color:#8caaa4;font-size:11px;font-weight:600;margin-left:10px">SOLUTIONS</span></a><a href="./index.html" class="back">← Về trang giới thiệu</a></div></header>
+<main class="wrap">
+<section class="hero"><div><div class="eyebrow">RF / Blueprint Tool / 0.1</div><h1>Thiết kế mạng.<br><span>Trước khi mua thiết bị.</span></h1><p>Nhập nhu cầu và nhận phương án sơ bộ: tải WAN, khoảng AP Wi-Fi, số cổng switch, phân vùng mạng, danh mục vật tư và checklist khảo sát.</p></div><div class="hero-tag">LOCAL ONLY · READ-ONLY · NO LOGIN</div></section>
+<div class="notice" role="note"><strong>An toàn mặc định:</strong> không quét mạng, không đăng nhập router, không gửi dữ liệu lên máy chủ. Kết quả chỉ là ước lượng phục vụ khảo sát, <strong>không phải thiết kế RF, báo giá chính thức hoặc cam kết hiệu năng</strong>.</div>
+<div class="layout">
+<section class="panel input-panel" aria-labelledby="inputTitle">
+ <div class="panel-head"><h2 id="inputTitle">01 / Thông số nhu cầu</h2><p>Điền số liệu dự kiến; có thể chọn một mẫu để bắt đầu.</p></div>
+ <div class="panel-body">
+ <form id="blueprintForm" novalidate>
+  <fieldset><legend>Mô hình & quy mô</legend><div class="fields">
+    <div class="field full"><label for="scenario">Mẫu giải pháp</label><select id="scenario" name="scenario"><option value="cafe">Cafe 100 / Wi-Fi khách</option><option value="live">LiveGuard / Studio livestream</option><option value="device">DeviceGrid / Lab nhiều thiết bị</option><option value="agency">AgencyNet / Văn phòng</option></select></div>
+    <div class="field full"><label for="site">Tên địa điểm (không nhập thông tin nhạy cảm)</label><input id="site" name="site" maxlength="80" value="Quán cà phê (mẫu)" autocomplete="off"></div>
+    <div class="field"><label for="devices">Số thiết bị dự kiến</label><input id="devices" name="devices" type="number" min="1" max="2000" step="1" value="100"></div>
+    <div class="field"><label for="wifiPercent">Thiết bị dùng Wi-Fi (%)</label><input id="wifiPercent" name="wifiPercent" type="number" min="0" max="100" step="1" value="95"></div>
+    <div class="field"><label for="activePercent">Hoạt động đồng thời (%)</label><input id="activePercent" name="activePercent" type="number" min="10" max="100" step="1" value="55"></div>
+    <div class="field"><label for="mbpsPerActive">Mbps / thiết bị hoạt động</label><input id="mbpsPerActive" name="mbpsPerActive" type="number" min=".2" max="50" step=".1" value="2"></div>
+    <div class="field"><label for="areaM2">Diện tích (m²)</label><input id="areaM2" name="areaM2" type="number" min="20" max="30000" step="1" value="320"></div>
+    <div class="field"><label for="floors">Số tầng</label><input id="floors" name="floors" type="number" min="1" max="30" step="1" value="2"></div>
+   </div></fieldset>
+  <fieldset><legend>Internet dự kiến</legend><div class="fields">
+    <div class="field"><label for="wanMain">WAN chính (Mbps)</label><input id="wanMain" name="wanMain" type="number" min="1" max="100000" step="1" value="200"></div>
+    <div class="field"><label for="wanBackup">WAN dự phòng (Mbps)</label><input id="wanBackup" name="wanBackup" type="number" min="0" max="100000" step="1" value="0"></div>
+   </div><div class="hint" style="margin-top:8px">Mbps là tốc độ danh nghĩa. Không cộng WAN dự phòng vào WAN chính để cam kết băng thông cho một kết nối.</div></fieldset>
+  <div class="error" id="errors" role="alert" aria-live="assertive"></div>
+  <button type="submit" class="btn btn-primary">Tạo phương án sơ bộ ↗</button>
+ </form></div>
+</section>
+<section class="panel output" aria-labelledby="outputTitle"><div class="panel-head"><h2 id="outputTitle">02 / Kết quả & phương án</h2><p>Kết quả cập nhật theo giả định được nhập, cần kỹ sư xác thực.</p></div><div class="panel-body">
+<div class="empty" id="empty"><span class="glyph">⌁</span><strong>Chưa có phương án</strong>Chọn mẫu giải pháp, điều chỉnh quy mô và nhấn “Tạo phương án sơ bộ”.</div>
+<div class="output-view" id="output" aria-live="polite">
+ <span class="draft">● BẢN NHÁP · CẦN KỸ SƯ DUYỆT</span><h2 class="result-title" id="resultTitle"></h2><p class="result-sub" id="resultSub"></p>
+ <div class="kpis"><div class="kpi"><small>Hoạt động đồng thời</small><strong id="metricActive">—</strong></div><div class="kpi"><small>WAN hoạch định</small><strong id="metricWan">—</strong><small>Mbps / giả định 70% tải</small></div><div class="kpi"><small>AP dự kiến</small><strong id="metricAp">—</strong><small>Chờ khảo sát RF</small></div></div>
+ <div class="section-title">SƠ ĐỒ PHÂN ĐOẠN SƠ BỘ</div><div class="topology"><div class="topo-line" id="topologyLabel"></div><div class="topo-core"><span class="topo-node accent">ROUTER / FIREWALL</span><span class="topo-node">SWITCH MANAGED</span><span class="topo-node">VLAN / AP / LAN</span></div></div><div class="section-title">NHÓM MẠNG GỢI Ý</div><div class="tags" id="segments"></div>
+ <div class="section-title">DANH MỤC VẬT TƯ ĐỊNH HƯỚNG</div><table><thead><tr><th>Hạng mục / điều kiện</th><th>Số lượng</th></tr></thead><tbody id="bom"></tbody></table>
+ <div class="section-title">PHÍ DỊCH VỤ THAM KHẢO</div><div class="money" id="fees"></div><p class="hint">Chưa bao gồm phần cứng, thi công, ISP và thuế. Không phải báo giá.</p>
+ <div class="section-title">CẦN XÁC MINH</div><ul class="bullets warning" id="warnings"></ul>
+ <div class="section-title">CHECKLIST KỸ SƯ</div><ul class="bullets" id="checkpoints"></ul>
+ <div class="section-title">BẢN ĐỀ XUẤT CÓ THỂ SAO CHÉP</div><pre class="report" id="report" tabindex="0"></pre>
+ <div class="actions"><button type="button" id="print" class="btn btn-primary">In / Lưu PDF</button><button type="button" id="copy" class="btn btn-secondary">Sao chép</button><button type="button" id="download" class="btn btn-secondary">Lưu .txt</button></div>
+ <p class="hint" style="margin-top:12px">Dữ liệu chỉ xử lý trong trình duyệt; xuất PDF bằng tính năng In → Save as PDF của hệ điều hành. Không có chức năng gửi lead tự động.</p>
+</div>
+</div></section>
+</div></main>
+<footer><div class="wrap">RouterFlow Network Blueprint v0.1 · Công cụ định hướng thiết kế · Không truy cập thiết bị, không giữ secrets và không thay thế khảo sát chuyên môn.</div></footer>
+<script>
+window.addEventListener('DOMContentLoaded',()=>{
+ const api=window.RouterFlowBlueprint;
+ if(!api){document.getElementById('errors').textContent='Không tải được bộ tính toán. Vui lòng thử tải lại trang.';document.getElementById('errors').style.display='block';return;}
+ const form=document.getElementById('blueprintForm');
+ const el=id=>document.getElementById(id);
+ let latest=null;
+ function preset(name){const p=api.PRESETS[name];if(!p)return;for(const [key,val]of Object.entries(p)){const control=form.elements.namedItem(key);if(control)control.value=String(val)}}
+ el('scenario').addEventListener('change',e=>preset(e.target.value));
+ function list(container,items){container.replaceChildren();for(const value of items){const li=document.createElement('li');li.textContent=value;container.append(li)}}
+ form.addEventListener('submit',e=>{
+   e.preventDefault();
+   const raw=Object.fromEntries(new FormData(form).entries());
+   const result=api.design(raw);
+   if(!result.ok){latest=null;el('errors').style.display='block';el('errors').textContent=result.errors.join(' ');el('output').classList.remove('show');el('empty').style.display='block';return;}
+   latest=result;el('errors').style.display='none';el('empty').style.display='none';el('output').classList.add('show');
+   const s=result.summary;
+   el('resultTitle').textContent=result.site;
+   el('resultSub').textContent=result.name+' · Wi-Fi '+s.wifiDevices+' thiết bị · LAN '+s.wiredDevices+' thiết bị';
+   el('metricActive').textContent=String(s.activeDevices);
+   el('metricWan').textContent=String(s.wanPlanningMbps);
+   el('metricAp').textContent=s.apRange.join('–');
+   el('topologyLabel').textContent=result.topology;
+   const segments=el('segments');segments.replaceChildren();
+   for(const name of result.segments){const span=document.createElement('span');span.className='tag';span.textContent=name;segments.append(span);}
+   const tbody=el('bom');tbody.replaceChildren();
+   for(const item of result.bom){const row=document.createElement('tr');const a=document.createElement('td');a.textContent=item.name;const small=document.createElement('small');small.textContent=item.note;a.append(small);const b=document.createElement('td');b.textContent=item.qty;row.append(a,b);tbody.append(row);}
+   el('fees').textContent=api.money(result.service.low)+' – '+api.money(result.service.high);
+   list(el('warnings'),result.warnings);list(el('checkpoints'),result.checkpoints);
+   el('report').textContent=api.asText(result);
+ });
+ el('print').addEventListener('click',()=>{if(latest)window.print()});
+ el('copy').addEventListener('click',async()=>{if(!latest)return;try{await navigator.clipboard.writeText(api.asText(latest));el('copy').textContent='✓ Đã sao chép';}catch{el('report').focus();el('copy').textContent='Chọn nội dung để sao chép';}});
+ el('download').addEventListener('click',()=>{if(!latest)return;const blob=new Blob([api.asText(latest)],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='routerflow-blueprint.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+});
+</script>
+</body></html>
