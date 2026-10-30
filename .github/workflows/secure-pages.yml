@@ -1,0 +1,73 @@
+name: Secure GitHub Pages publish
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: secure-pages-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  security-release:
+    name: security-public-release (required before publish)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check out independently reviewed security approvals
+        uses: actions/checkout@v4
+        with:
+          repository: hungtranbkit/project-standards
+          ref: main
+          path: _security_catalog
+          persist-credentials: false
+      - name: Reject missing, wrong-project or unapproved exact-SHA release
+        env:
+          RELEASE_REPO: ${{ github.repository }}
+          RELEASE_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          proof="_security_catalog/approvals/${RELEASE_REPO}/${RELEASE_SHA}"
+          test -f "$proof/release-gate.json" || {
+            echo "::error::SECURITY_RELEASE_BLOCKED: no independent approval for this commit"
+            exit 1
+          }
+          python3 - "$proof/release-gate.json" "$RELEASE_REPO" "$RELEASE_SHA" <<'PY'
+          import json, sys
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          assert report.get("project") == sys.argv[2], "approval project mismatch"
+          assert report.get("release", {}).get("source_sha") == sys.argv[3], "approval SHA mismatch"
+          assert report.get("surfaces") == ["static-landing"], "unexpected release profile"
+          PY
+          python3 _security_catalog/standards/security-public-release/kit/validate_release_gate.py \
+            --root "$proof" --manifest release-gate.json --mode enforce --expected-sha "$RELEASE_SHA"
+  publish-pages:
+    name: publish reviewed pages only
+    needs: security-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build allowlisted public files only
+        shell: bash
+        run: bash scripts/build-pages-artifact.sh
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
